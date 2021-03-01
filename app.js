@@ -6,7 +6,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     port: 3306,
     user: 'root',
-    password: 'Kimberly#239776',
+    password: '',
     database: 'employee_tracker_db'
 });
 
@@ -121,7 +121,7 @@ function addEmp() {
             }, {
                 type: "input",
                 name: "empManager",
-                message: "What is their manager's employee id",
+                message: "What is their manager's employee id?",
             }
         ]).then((answer) => {
             connection.query(
@@ -139,3 +139,8 @@ function addEmp() {
             )
         })
 }
+
+
+connection.query(
+    "SELECT"
+)
