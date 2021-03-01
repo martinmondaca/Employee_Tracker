@@ -1,0 +1,26 @@
+{
+  "name": "Employee_Tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/martinmondaca/Employee_Tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/martinmondaca/Employee_Tracker/issues"
+  },
+  "homepage": "https://github.com/martinmondaca/Employee_Tracker#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^8.0.0",
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.7"
+  }
+}
