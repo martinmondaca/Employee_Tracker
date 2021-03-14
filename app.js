@@ -24,7 +24,7 @@ function innit() {
                 name: "whatToDo",
                 message: "What would you like to do?",
                 choices: ["Add a department", "View all departments", "Add a role", "View all roles", "Add an employee",
-                    "View all employees", "Update employee role"]
+                    "View all employees", "Update employee role", "EXIT"]
                 // ["View All Employees", "View All Employees By Department", "View All Employees By Manager",
                 //     "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "View All Roles",
                 //     "Add Role", "Remove Role", "EXIT"]
@@ -34,7 +34,7 @@ function innit() {
                 console.log("adding dept")
                 addDept()
             } else if (response.whatToDo === "View all departments") {
-
+                viewAllDept()
             } else if (response.whatToDo === "Add a role") {
                 addRole()
             } else if (response.whatToDo === "View all roles") {
@@ -59,7 +59,7 @@ function addDept() {
                 name: "deptName",
                 message: "What is the department's name?"
             }
-        ]).then((answer) => {
+        ]).then(function (answer) {
             connection.query(
                 "INSERT INTO department SET ?",
                 {
@@ -67,45 +67,68 @@ function addDept() {
                 },
                 function (err) {
                     if (err) throw err;
+                    console.log("The department was added successfully!")
                     innit()
                 }
             )
         })
 }
 
+function viewAllDept() {
+    connection.query("SELECT * FROM department", function (err, res) {
+        if (err) throw err;
+
+        console.table(res)
+        innit()
+    })
+}
+
 //prompts for adding a new role
 function addRole() {
-    inquirer
-        .prompt([
-            {
-                type: "input",
-                name: "roleTitle",
-                message: "What is the role's title?"
-            },
-            {
-                type: "input",
-                name: "roleSalary",
-                message: "What is the role's salary?"
-            },
-            {
-                type: "input",
-                name: "roleDeptId",
-                message: "What is the role's department id?"
-            }
-        ]).then((answer) => {
-            connection.query(
-                "INSERT INTO roles SET ?",
+    var currentDeptId = "";
+    connection.query("SELECT * FROM department", function (err, res) {
+        if (err) throw err;
+        inquirer
+            .prompt([
                 {
-                    title: answer.roleTitle,
-                    salary: answer.roleSalary,
-                    department_id: answer.roleDeptId,
+                    type: "input",
+                    name: "roleTitle",
+                    message: "What is the role's title?"
                 },
-                function (err) {
-                    if (err) throw err;
-                    innit()
+                {
+                    type: "input",
+                    name: "roleSalary",
+                    message: "What is the role's salary?"
+                },
+                {
+                    type: "list",
+                    name: "roleDeptName",
+                    message: "What is the role's department?",
+                    choices: function () {
+                        let deptArray = [];
+                        for (let i = 0; i < res.length; i++) {
+                            deptArray.push(res[i].dept_name);
+                        }
+                        return deptArray;
+                    }
                 }
-            )
-        })
+            ]).then(function (answer) {
+                var chosenDept = res.find(item => item.dept_name === answer.roleDeptName)
+                connection.query(
+                    "INSERT INTO roles SET ?",
+                    {
+                        title: answer.roleTitle,
+                        salary: parseInt(answer.roleSalary),
+                        dept_id: parseInt(chosenDept.id)
+                    },
+                    function (err) {
+                        if (err) throw err;
+                        console.log(`The ${answer.roleTitle} role was addedd successfully!`)
+                        innit()
+                    }
+                )
+            })
+    })
 }
 
 //prompts for adding new employee
@@ -147,6 +170,3 @@ function addEmp() {
 }
 
 
-connection.query(
-    "SELECT"
-)
