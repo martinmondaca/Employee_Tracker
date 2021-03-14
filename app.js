@@ -23,19 +23,25 @@ function innit() {
                 type: "list",
                 name: "whatToDo",
                 message: "What would you like to do?",
-                choices: ["Add department", "Add role", "Add employee", "View department", "View roles", "Update employee role", "EXIT"]
+                choices: ["Add a department", "View all departments", "Add a role", "View all roles", "Add an employee",
+                    "View all employees", "Update employee role"]
+                // ["View All Employees", "View All Employees By Department", "View All Employees By Manager",
+                //     "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "View All Roles",
+                //     "Add Role", "Remove Role", "EXIT"]
             }
         ]).then((response) => {
-            if (response.whatToDo === "Add department") {
+            if (response.whatToDo === "Add a department") {
                 console.log("adding dept")
                 addDept()
-            } else if (response.whatToDo === "Add role") {
-                addRole()
-            } else if (response.whatToDo === "Add employee") {
-                addEmp()
-            } else if (response.whatToDo === "View department") {
+            } else if (response.whatToDo === "View all departments") {
 
-            } else if (response.whatToDo === "View roles") {
+            } else if (response.whatToDo === "Add a role") {
+                addRole()
+            } else if (response.whatToDo === "View all roles") {
+
+            } else if (response.whatToDo === "Add an employee") {
+                addEmp()
+            } else if (response.whatToDo === "View all employees") {
 
             } else if (response.whatToDo === "Update employee role") {
 
