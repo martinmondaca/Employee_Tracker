@@ -38,7 +38,7 @@ function innit() {
             } else if (response.whatToDo === "Add a role") {
                 addRole()
             } else if (response.whatToDo === "View all roles") {
-
+                viewAllRoles()
             } else if (response.whatToDo === "Add an employee") {
                 addEmp()
             } else if (response.whatToDo === "View all employees") {
@@ -75,10 +75,14 @@ function addDept() {
 }
 
 function viewAllDept() {
-    connection.query("SELECT * FROM department", function (err, res) {
+    const query = `
+    SELECT dept_name as department
+    FROM department`
+    connection.query(query, function (err, res) {
         if (err) throw err;
-
+        console.log("")
         console.table(res)
+        console.log("")
         innit()
     })
 }
@@ -128,6 +132,21 @@ function addRole() {
                     }
                 )
             })
+    })
+}
+
+function viewAllRoles() {
+    const query = `
+    SELECT r.title, r.salary, d.dept_name AS department 
+    FROM roles r 
+    LEFT JOIN department d 
+    ON r.dept_id = d.id`
+    connection.query(query, function (err, res) {
+        if (err) throw err;
+        console.log("")
+        console.table(res)
+        console.log("")
+        innit()
     })
 }
 
