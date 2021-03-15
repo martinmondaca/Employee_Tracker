@@ -25,9 +25,9 @@ function innit() {
                 message: "What would you like to do?",
                 choices: ["Add a department", "View all departments", "Add a role", "View all roles", "Add an employee",
                     "View all employees", "Update employee role", "EXIT"]
-                // ["View All Employees", "View All Employees By Department", "View All Employees By Manager",
-                //     "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "View All Roles",
-                //     "Add Role", "Remove Role", "EXIT"]
+                // ["View All Employees By Department", "View All Employees By Manager",
+                //     "Remove Employee", "Update Employee Manager", 
+                //     , "Remove Role", "EXIT"]
             }
         ]).then((response) => {
             if (response.whatToDo === "Add a department") {
@@ -89,7 +89,6 @@ function viewAllDept() {
 
 //prompts for adding a new role
 function addRole() {
-    var currentDeptId = "";
     connection.query("SELECT * FROM department", function (err, res) {
         if (err) throw err;
         inquirer
@@ -152,6 +151,11 @@ function viewAllRoles() {
 
 //prompts for adding new employee
 function addEmp() {
+    let newEmpFirst;
+    let newEmpLast;
+    let newEmpRole;
+    let newEmpManager;
+
     inquirer
         .prompt([
             {
@@ -162,30 +166,79 @@ function addEmp() {
                 type: "input",
                 name: "empLastName",
                 message: "What is the employee's last name?",
-            }, {
-                type: "input",
-                name: "empRole",
-                message: "What is the employee's role id?",
-            }, {
-                type: "input",
-                name: "empManager",
-                message: "What is their manager's employee id?",
-            }
+            },
         ]).then((answer) => {
-            connection.query(
-                "INSERT INTO employee SET ?",
-                {
-                    first_name: answer.empFirstName,
-                    last_name: answer.empLastName,
-                    role_id: answer.empRole,
-                    manager_id: answer.empManager,
-                },
-                function (err) {
-                    if (err) throw err;
-                    innit()
-                }
-            )
+            newEmpFirst = answer.empFirstName;
+            newEmpLast = answer.empLastName;
+            connection.query("SELECT * FROM roles", function (err, res) {
+                if (err) throw err;
+                inquirer
+                    .prompt([
+                        {
+                            type: "list",
+                            name: "empRole",
+                            message: "What is the employee's role?",
+                            choices: function () {
+                                let roleArray = [];
+                                for (let i = 0; i < res.length; i++) {
+                                    roleArray.push(res[i].title);
+                                }
+                                return roleArray;
+                            }
+                        }
+                    ]).then((answer) => {
+                        var chosenDept = res.find(item => item.title === answer.empRole);
+                        newEmpRole = chosenDept.id;
+                        connection.query("SELECT * FROM employee", function (err, res) {
+                            if (err) throw err;
+                            inquirer
+                                .prompt([
+                                    {
+                                        type: "list",
+                                        name: "empManager",
+                                        message: "Who is the employee's manager?",
+                                        choices: function () {
+                                            let managerArray = [];
+                                            for (let i = 0; i < res.length; i++) {
+                                                managerArray.push(res[i].first_name + " " + res[i].last_name);
+                                            }
+                                            return managerArray;
+                                        }
+                                    }
+                                ]).then((answer) => {
+                                    var chosenManager = res.find(item => (item.first_name + " " + item.last_name) === answer.empManager);
+                                    newEmpManager = chosenManager.id;
+                                    connection.query(
+                                        "INSERT INTO employee SET ?",
+                                        {
+                                            first_name: newEmpFirst,
+                                            last_name: newEmpLast,
+                                            role_id: parseInt(newEmpRole),
+                                            manager_id: parseInt(newEmpManager)
+                                        },
+                                        function (err) {
+                                            if (err) throw err;
+                                            console.log(`New employee, ${newEmpFirst} ${newEmpLast}, has been successfully added!`)
+                                            innit()
+                                        }
+                                    )
+                                })
+                        })
+                    })
+            })
         })
 }
 
-
+// connection.query(
+//     "INSERT INTO employee SET ?",
+//     {
+//         first_name: answer.empFirstName,
+//         last_name: answer.empLastName,
+//         role_id: answer.empRole,
+//         manager_id: answer.empManager,
+//     },
+//     function (err) {
+//         if (err) throw err;
+//         innit()
+//     }
+// )
