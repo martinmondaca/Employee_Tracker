@@ -30,7 +30,6 @@ function innit() {
             }
         ]).then((response) => {
             if (response.whatToDo === "Add a department") {
-                console.log("adding dept")
                 addDept()
             } else if (response.whatToDo === "View all departments") {
                 viewAllDept()
@@ -178,7 +177,7 @@ function removeRole() {
                     },
                     function (err, res) {
                         if (err) throw err;
-                        console.log(`${answe.removeRole} role is now removed!`)
+                        console.log(`${answer.removeRole} role is now removed!`)
                         innit()
                     }
                 )
