@@ -42,7 +42,7 @@ function innit() {
             } else if (response.whatToDo === "Add an employee") {
                 addEmp()
             } else if (response.whatToDo === "View all employees") {
-
+                viewAllEmp()
             } else if (response.whatToDo === "Update employee role") {
 
             } else {
@@ -74,6 +74,7 @@ function addDept() {
         })
 }
 
+//prompt for viewing all departments
 function viewAllDept() {
     const query = `
     SELECT dept_name as department
@@ -134,6 +135,7 @@ function addRole() {
     })
 }
 
+//prompt for viewing all roles
 function viewAllRoles() {
     const query = `
     SELECT r.title, r.salary, d.dept_name AS department 
@@ -229,16 +231,23 @@ function addEmp() {
         })
 }
 
-// connection.query(
-//     "INSERT INTO employee SET ?",
-//     {
-//         first_name: answer.empFirstName,
-//         last_name: answer.empLastName,
-//         role_id: answer.empRole,
-//         manager_id: answer.empManager,
-//     },
-//     function (err) {
-//         if (err) throw err;
-//         innit()
-//     }
-// )
+//prompt for viewing all employees
+function viewAllEmp() {
+    const query = `
+    SELECT e.first_name AS "First name", e.last_name AS "Last name", r.title AS Role, r.salary AS Salary, 
+    CONCAT(em.first_name, " ", em.last_name) AS "Manager name"
+    FROM employee e
+    LEFT JOIN 
+    roles r
+    ON r.id = e.role_id
+    LEFT JOIN employee em
+    ON e.manager_id = em.id
+    `
+    connection.query(query, function (err, res) {
+        if (err) throw err;
+        console.log("")
+        console.table(res)
+        console.log("")
+        innit()
+    })
+}
