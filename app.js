@@ -24,8 +24,8 @@ function innit() {
                 name: "whatToDo",
                 message: "What would you like to do?",
                 choices: ["Add a department", "View all departments", "Add a role", "Remove a role", "View all roles", "Add an employee", "Remove an employee",
-                    "View all employees", "Update employee role", "EXIT"]
-                // ["View All Employees By Department", "View All Employees By Manager",
+                    "View all employees", "View all employees by department", "Update employee role", "EXIT"]
+                //  "View All Employees By Manager",
                 //     ", "Update Employee Manager"]
             }
         ]).then((response) => {
@@ -45,6 +45,8 @@ function innit() {
                 viewAllEmp()
             } else if (response.whatToDo === "Update employee role") {
                 updateEmpRole()
+            } else if (response.whatToDo === "View all employees by department") {
+                viewAllEmpDept()
             } else if (response.whatToDo === "Remove a role") {
                 removeRole()
             } else {
@@ -225,8 +227,8 @@ function addEmp() {
                             }
                         }
                     ]).then((answer) => {
-                        var chosenDept = res.find(item => item.title === answer.empRole);
-                        newEmpRole = chosenDept.id;
+                        var chosenRole = res.find(item => item.title === answer.empRole);
+                        newEmpRole = chosenRole.id;
                         connection.query("SELECT * FROM employee", function (err, res) {
                             if (err) throw err;
                             inquirer
@@ -322,12 +324,55 @@ function viewAllEmp() {
     })
 }
 
+//promp for viewing all employees by department
+function viewAllEmpDept() {
+    connection.query("SELECT * FROM department", function (err, res) {
+        if (err) throw err;
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "deptName",
+                    message: "Which department's employees would you like to view?",
+                    choices: function () {
+                        let deptArray = [];
+                        for (let i = 0; i < res.length; i++) {
+                            deptArray.push(res[i].dept_name);
+                        }
+                        return deptArray;
+                    }
+                }
+            ]).then((answer) => {
+                var chosenDept = res.find(item => item.dept_name === answer.deptName);
+                query = `
+                SELECT e.first_name AS "First name", e.last_name AS "Last name", r.title AS Title, r.salary AS Salary, d.dept_name AS Department
+                FROM employee e
+                LEFT JOIN
+                (roles r
+                LEFT JOIN department d
+                ON d.id = r.dept_id)
+                ON e.role_id = r.id
+                WHERE ?`
+                connection.query(query,
+                    {
+                        dept_id: chosenDept.id
+                    }, function (err, res) {
+                        if (err) throw err;
+                        console.log("")
+                        console.table(res)
+                        console.log("")
+                        innit()
+                    })
+            })
+    })
+}
+
 //prompt to update employee's role
 function updateEmpRole() {
     let empName;
     let empToUpdate;
     let empRoleUpdate;
-    connection.query("SELECT * from employee", function (err, res) {
+    connection.query("SELECT * FROM employee", function (err, res) {
         if (err) throw err;
         inquirer
             .prompt([
