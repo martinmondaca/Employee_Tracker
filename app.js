@@ -23,10 +23,10 @@ function innit() {
                 type: "list",
                 name: "whatToDo",
                 message: "What would you like to do?",
-                choices: ["Add a department", "View all departments", "Add a role", "Remove a role", "View all roles", "Add an employee",
+                choices: ["Add a department", "View all departments", "Add a role", "Remove a role", "View all roles", "Add an employee", "Remove an employee",
                     "View all employees", "Update employee role", "EXIT"]
                 // ["View All Employees By Department", "View All Employees By Manager",
-                //     "Remove Employee", "Update Employee Manager"]
+                //     ", "Update Employee Manager"]
             }
         ]).then((response) => {
             if (response.whatToDo === "Add a department") {
@@ -39,6 +39,8 @@ function innit() {
                 viewAllRoles()
             } else if (response.whatToDo === "Add an employee") {
                 addEmp()
+            } else if (response.whatToDo === "Remove an employee") {
+                removeEmp()
             } else if (response.whatToDo === "View all employees") {
                 viewAllEmp()
             } else if (response.whatToDo === "Update employee role") {
@@ -263,6 +265,40 @@ function addEmp() {
                     })
             })
         })
+}
+
+//prompt for removing an employee
+function removeEmp() {
+    connection.query("SELECT * FROM employee", function (err, res) {
+        if (err) throw err;
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "removeEmp",
+                    message: "Which employee would you like to remove?",
+                    choices: function () {
+                        let empArray = [];
+                        for (let i = 0; i < res.length; i++) {
+                            empArray.push(res[i].first_name + " " + res[i].last_name);
+                        }
+                        return empArray;
+                    }
+                }
+            ]).then((answer) => {
+                var chosenEmp = res.find(item => (item.first_name + " " + item.last_name) === answer.removeEmp)
+                connection.query("DELETE FROM employee WHERE ?",
+                    {
+                        id: chosenEmp.id
+                    },
+                    function (err, res) {
+                        if (err) throw err;
+                        console.log(`${answer.removeEmp} is now removed!`)
+                        innit()
+                    }
+                )
+            })
+    })
 }
 
 //prompt for viewing all employees
