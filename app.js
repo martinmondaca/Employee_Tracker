@@ -23,11 +23,10 @@ function innit() {
                 type: "list",
                 name: "whatToDo",
                 message: "What would you like to do?",
-                choices: ["Add a department", "View all departments", "Add a role", "View all roles", "Add an employee",
+                choices: ["Add a department", "View all departments", "Add a role", "Remove a role", "View all roles", "Add an employee",
                     "View all employees", "Update employee role", "EXIT"]
                 // ["View All Employees By Department", "View All Employees By Manager",
-                //     "Remove Employee", "Update Employee Manager", 
-                //     , "Remove Role", "EXIT"]
+                //     "Remove Employee", "Update Employee Manager"]
             }
         ]).then((response) => {
             if (response.whatToDo === "Add a department") {
@@ -45,6 +44,8 @@ function innit() {
                 viewAllEmp()
             } else if (response.whatToDo === "Update employee role") {
                 updateEmpRole()
+            } else if (response.whatToDo === "Remove a role") {
+                removeRole()
             } else {
                 connection.end()
             }
@@ -148,6 +149,40 @@ function viewAllRoles() {
         console.table(res)
         console.log("")
         innit()
+    })
+}
+
+//prompt for removing a role
+function removeRole() {
+    connection.query("SELECT * FROM roles", function (err, res) {
+        if (err) throw err;
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "removeRole",
+                    message: "Which role would you like to remove?",
+                    choices: function () {
+                        let roleArray = [];
+                        for (let i = 0; i < res.length; i++) {
+                            roleArray.push(res[i].title);
+                        }
+                        return roleArray;
+                    }
+                }
+            ]).then((answer) => {
+                var chosenRole = res.find(item => item.title === answer.removeRole)
+                connection.query("DELETE FROM roles WHERE ?",
+                    {
+                        id: chosenRole.id
+                    },
+                    function (err, res) {
+                        if (err) throw err;
+                        console.log(`${answe.removeRole} role is now removed!`)
+                        innit()
+                    }
+                )
+            })
     })
 }
 
