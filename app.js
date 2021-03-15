@@ -44,7 +44,7 @@ function innit() {
             } else if (response.whatToDo === "View all employees") {
                 viewAllEmp()
             } else if (response.whatToDo === "Update employee role") {
-
+                updateEmpRole()
             } else {
                 connection.end()
             }
@@ -249,5 +249,68 @@ function viewAllEmp() {
         console.table(res)
         console.log("")
         innit()
+    })
+}
+
+//prompt to update employee's role
+function updateEmpRole() {
+    let empName;
+    let empToUpdate;
+    let empRoleUpdate;
+    connection.query("SELECT * from employee", function (err, res) {
+        if (err) throw err;
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "empName",
+                    message: "Which employee would you like to update?",
+                    choices: function () {
+                        let empArray = [];
+                        for (let i = 0; i < res.length; i++) {
+                            empArray.push(res[i].first_name + " " + res[i].last_name);
+                        }
+                        return empArray;
+                    }
+                }
+            ]).then((answer) => {
+                var chosenEmp = res.find(item => (item.first_name + " " + item.last_name) === answer.empName);
+                empToUpdate = chosenEmp.id;
+                empName = answer.empName;
+                connection.query("SELECT * FROM roles", function (err, res) {
+                    if (err) throw err;
+                    inquirer
+                        .prompt([
+                            {
+                                type: "list",
+                                name: "newRole",
+                                message: "What is the employee's new role?",
+                                choices: function () {
+                                    let roleArray = [];
+                                    for (let i = 0; i < res.length; i++) {
+                                        roleArray.push(res[i].title);
+                                    }
+                                    return roleArray;
+                                }
+                            }
+
+                        ]).then((answer) => {
+                            var chosenRole = res.find(item => item.title === answer.newRole)
+                            empRoleUpdate = chosenRole.id
+                            connection.query(
+                                "UPDATE employee SET ? WHERE ?",
+                                [
+                                    { role_id: parseInt(empRoleUpdate) },
+                                    { id: parseInt(empToUpdate) }
+                                ],
+                                function (err) {
+                                    if (err) throw err;
+                                    console.log(`${empName}'s role is now updated!`)
+                                    innit()
+                                }
+                            )
+                        })
+                })
+            })
     })
 }
