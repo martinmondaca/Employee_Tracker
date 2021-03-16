@@ -24,8 +24,7 @@ function innit() {
                 name: "whatToDo",
                 message: "What would you like to do?",
                 choices: ["Add a department", "View all departments", "Add a role", "Remove a role", "View all roles", "Add an employee", "Remove an employee",
-                    "View all employees", "View all employees by department", "View all employees by manager", "Update employee role", "EXIT"]
-                //     ", "Update Employee Manager"]
+                    "View all employees", "View all employees by department", "View all employees by manager", "Update employee role", "Update employee manager", "EXIT"]
             }
         ]).then((response) => {
             if (response.whatToDo === "Add a department") {
@@ -44,6 +43,8 @@ function innit() {
                 viewAllEmp()
             } else if (response.whatToDo === "Update employee role") {
                 updateEmpRole()
+            } else if (response.whatToDo === "Update employee manager") {
+                updateEmpManager()
             } else if (response.whatToDo === "View all employees by department") {
                 viewAllEmpDept()
             } else if (response.whatToDo === "View all employees by manager") {
@@ -476,3 +477,58 @@ function updateEmpRole() {
             })
     })
 }
+
+//prompt for updating employee manager
+function updateEmpManager() {
+    connection.query("SELECT * FROM employee", function (err, res) {
+        if (err) throw err;
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "empName",
+                    message: "Which employee would you like to update?",
+                    choices: function () {
+                        let empArray = [];
+                        for (let i = 0; i < res.length; i++) {
+                            empArray.push(res[i].first_name + " " + res[i].last_name);
+                        }
+                        return empArray;
+                    }
+                }
+            ]).then((answer) => {
+                var chosenEmp = res.find(item => (item.first_name + " " + item.last_name) === answer.empName);
+                connection.query("SELECT e.id, e.first_name, e.last_name FROM employee e LEFT JOIN roles r ON e.role_id = r.id WHERE title = 'Manager' OR 'manager'", function (err, res) {
+                    if (err) throw err;
+                    inquirer
+                        .prompt([
+                            {
+                                type: "list",
+                                name: "managerName",
+                                message: "Who is the employees new manger?",
+                                choices: function () {
+                                    let managerArray = [];
+                                    for (let i = 0; i < res.length; i++) {
+                                        managerArray.push(res[i].first_name + " " + res[i].last_name);
+                                    }
+                                    console.log(managerArray)
+
+                                    return managerArray;
+                                }
+                            }
+                        ]).then((answer) => {
+                            var chosenManager = res.find(item => (item.first_name + " " + item.last_name) === answer.managerName);
+                            connection.query("UPDATE employee SET ? WHERE ?",
+                                [
+                                    { manager_id: chosenManager.id },
+                                    { id: chosenEmp.id }
+                                ],
+                                function (err) {
+                                    if (err) throw err;
+                                    console.log(`${chosenEmp}'s manager has been updated!`)
+                                    innit()
+                                })
+                        })
+                })
+            })
+    }
