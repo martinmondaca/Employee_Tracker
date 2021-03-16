@@ -6,7 +6,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     port: 3306,
     user: 'root',
-    password: '',
+    password: 'Kimberly#239776',
     database: 'employee_tracker_db'
 });
 
@@ -385,14 +385,11 @@ function viewAllEmpByManager() {
                         for (let i = 0; i < res.length; i++) {
                             managerArray.push(res[i].first_name + " " + res[i].last_name);
                         }
-                        console.log(managerArray)
-
                         return managerArray;
                     }
                 }
             ]).then((answer) => {
                 var chosenManager = res.find(item => (item.first_name + " " + item.last_name) === answer.managerName);
-                console.log(chosenManager)
                 query = `
                  SELECT e.first_name AS "First name", e.last_name AS "Last name", r.title AS Title, r.salary AS Salary, d.dept_name AS Department
                  FROM employee e
