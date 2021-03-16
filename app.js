@@ -24,8 +24,7 @@ function innit() {
                 name: "whatToDo",
                 message: "What would you like to do?",
                 choices: ["Add a department", "View all departments", "Add a role", "Remove a role", "View all roles", "Add an employee", "Remove an employee",
-                    "View all employees", "View all employees by department", "Update employee role", "EXIT"]
-                //  "View All Employees By Manager",
+                    "View all employees", "View all employees by department", "View all employees by manager", "Update employee role", "EXIT"]
                 //     ", "Update Employee Manager"]
             }
         ]).then((response) => {
@@ -47,6 +46,8 @@ function innit() {
                 updateEmpRole()
             } else if (response.whatToDo === "View all employees by department") {
                 viewAllEmpDept()
+            } else if (response.whatToDo === "View all employees by manager") {
+                viewAllEmpByManager()
             } else if (response.whatToDo === "Remove a role") {
                 removeRole()
             } else {
@@ -356,6 +357,52 @@ function viewAllEmpDept() {
                 connection.query(query,
                     {
                         dept_id: chosenDept.id
+                    }, function (err, res) {
+                        if (err) throw err;
+                        console.log("")
+                        console.table(res)
+                        console.log("")
+                        innit()
+                    })
+            })
+    })
+}
+
+//prompt to view all employees by manager
+function viewAllEmpByManager() {
+    connection.query("SELECT e.id, e.first_name, e.last_name FROM employee e LEFT JOIN roles r ON e.role_id = r.id WHERE title = 'Manager' OR 'manager'", function (err, res) {
+        if (err) throw err;
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "managerName",
+                    message: "Which manager's employees would you like to view?",
+                    choices: function () {
+                        let managerArray = [];
+                        for (let i = 0; i < res.length; i++) {
+                            managerArray.push(res[i].first_name + " " + res[i].last_name);
+                        }
+                        console.log(managerArray)
+
+                        return managerArray;
+                    }
+                }
+            ]).then((answer) => {
+                var chosenManager = res.find(item => (item.first_name + " " + item.last_name) === answer.managerName);
+                console.log(chosenManager)
+                query = `
+                 SELECT e.first_name AS "First name", e.last_name AS "Last name", r.title AS Title, r.salary AS Salary, d.dept_name AS Department
+                 FROM employee e
+                 LEFT JOIN
+                 (roles r
+                 LEFT JOIN department d
+                 ON d.id = r.dept_id)
+                 ON e.role_id = r.id
+                 WHERE ?`
+                connection.query(query,
+                    {
+                        manager_id: chosenManager.id
                     }, function (err, res) {
                         if (err) throw err;
                         console.log("")
