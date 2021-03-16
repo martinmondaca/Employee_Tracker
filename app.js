@@ -56,6 +56,7 @@ function innit() {
             }
         })
 }
+
 //prompts for adding a new department
 function addDept() {
     inquirer
@@ -505,15 +506,13 @@ function updateEmpManager() {
                             {
                                 type: "list",
                                 name: "managerName",
-                                message: "Who is the employees new manger?",
+                                message: "Who is the employee's new manager?",
                                 choices: function () {
                                     let managerArray = [];
                                     for (let i = 0; i < res.length; i++) {
                                         managerArray.push(res[i].first_name + " " + res[i].last_name);
                                     }
-                                    console.log(managerArray)
-
-                                    return managerArray;
+                                    return managerArray
                                 }
                             }
                         ]).then((answer) => {
@@ -525,10 +524,11 @@ function updateEmpManager() {
                                 ],
                                 function (err) {
                                     if (err) throw err;
-                                    console.log(`${chosenEmp}'s manager has been updated!`)
+                                    console.log(`${chosenEmp.first_name} ${chosenEmp.last_name}'s manager has been updated!`)
                                     innit()
                                 })
                         })
                 })
             })
-    }
+    })
+}
