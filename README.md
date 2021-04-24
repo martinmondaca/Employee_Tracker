@@ -17,7 +17,7 @@
 
   The motivation for this projects was the desire to use MySQL in order to store information that can be created, read, updated, and deleted using the Inquirer npm package.
 
-  The reason for creating this specific project was the need for an application that a business owner can use to view and manage the departments, roles, and employees in a company. This allows for better planning and organiztion of a business.
+  The reason for creating this specific project was the need for an application that a business owner can use to view and manage the departments, roles, and employees in a company. This allows for better planning and organization of a business.
 
   One of the challenges faced while building this project was the need to use multiple queries in succession in order to perform some of the actions presented in inquirer. In order to overcome this, I had to be very careful in calling each query in the correct order, and then storing the response information globally within a function for later use in combination with the results of other queries to the database.
 
